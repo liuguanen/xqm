@@ -2,7 +2,6 @@
 <html>
 
 <head>
-  <meta name="baidu-site-verification" content="codeva-1oArYclFj6" />
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="renderer" content="webkit">
@@ -78,6 +77,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px 0;
     }
 
     @media screen and (max-width:1024px) {
@@ -382,14 +382,14 @@
       box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
     }
 
-    /* 友情链接样式 */
-    .friend-link {
+    /* VPN链接样式 */
+    .vpn-link {
       margin-top: 25px;
       text-align: center;
       width: 100%;
     }
     
-    .friend-link a {
+    .vpn-link a {
       font-size: 0.9rem;
       color: rgba(255, 255, 255, 0.7);
       text-decoration: none;
@@ -404,7 +404,7 @@
       line-height: 1.4;
     }
     
-    .friend-link a:hover {
+    .vpn-link a:hover {
       color: #ffffff;
       background: rgba(255, 255, 255, 0.1);
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
@@ -488,7 +488,95 @@
       font-size: 1.2rem;
     }
     
-    /* 横屏适配：当有足够空间时，二维码和文字并排显示 */
+    /* 友情链接样式 */
+    .friends-section {
+      margin-top: 30px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .friends-title {
+      color: #ffffff;
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .friends-title i {
+      color: #ffd700;
+      font-size: 1.3rem;
+    }
+    
+    .friends-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+    }
+    
+    .friend-link-item {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      text-decoration: none;
+      display: block;
+    }
+    
+    .friend-link-item:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .link-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      text-decoration: none;
+    }
+    
+    .link-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      flex-shrink: 0;
+    }
+    
+    .link-info {
+      flex: 1;
+      text-align: left;
+    }
+    
+    .link-title {
+      color: #ffffff;
+      font-size: 1.1rem;
+      margin: 0 0 8px 0;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    
+    .link-desc {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.85rem;
+      margin: 0;
+      line-height: 1.4;
+      text-decoration: none;
+    }
+    
+    /* 横屏适配：当有足够空间时 */
     @media screen and (min-width: 768px) {
       .qq-group-content {
         flex-direction: row;
@@ -504,6 +592,17 @@
       .qrcode-img {
         width: 140px;
         height: 140px;
+      }
+      
+      .friends-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .friend-link-item {
+        width: calc(50% - 10px);
+        max-width: 400px;
       }
     }
   </style>
@@ -534,8 +633,9 @@
       </ul>
     </div>
 
-    <div class="friend-link">
-      <a href="https://api1.indevs.in/vpn" target="_blank">加速服务</a>
+    <!-- VPN链接 -->
+    <div class="vpn-link">
+      <a href="https://api1.indevs.in/vpn" target="_blank">美国VPN加速服务</a>
     </div>
     
     <!-- QQ群信息（带二维码） -->
@@ -555,6 +655,38 @@
           <div class="qq-group-number">1072402703</div>
           <p class="qq-group-desc">扫描二维码或搜索群号加入<br>获取最新资源更新和技术支持</p>
         </div>
+      </div>
+    </div>
+    
+    <!-- 友情链接部分 -->
+    <div class="friends-section">
+      <div class="friends-title">
+        <i class="fas fa-handshake"></i> 友情链接
+      </div>
+      
+      <div class="friends-container">
+        <a href="https://ppkjgzs.top/" target="_blank" rel="noopener noreferrer" class="friend-link-item">
+          <div class="link-content">
+            <img src="https://ppkjgzs.top/images/logo.jpeg" alt="平平的小破站" class="link-logo">
+            <div class="link-info">
+              <h3 class="link-title">平平的小破站</h3>
+              <p class="link-desc">一个分享编程知识和技术教程的个人博客网站，涵盖前端开发、Python编程等内容。</p>
+            </div>
+          </div>
+        </a>
+        
+        <!-- 可以在这里添加更多友情链接 -->
+        <!--
+        <a href="https://example.com/" target="_blank" rel="noopener noreferrer" class="friend-link-item">
+          <div class="link-content">
+            <img src="https://example.com/logo.jpg" alt="网站名称" class="link-logo">
+            <div class="link-info">
+              <h3 class="link-title">网站名称</h3>
+              <p class="link-desc">网站描述内容</p>
+            </div>
+          </div>
+        </a>
+        -->
       </div>
     </div>
   </div>
