@@ -229,7 +229,7 @@
             color: #ffeb3b;
             display: none;
         }
-        /* 信息收集表单样式 - 简化 */
+        /* 中奖信息表单 - 只保留现金奖项 */
         .info-form {
             display: none;
             background: rgba(255, 255, 255, 0.15);
@@ -305,25 +305,9 @@
             <img id="qq-image" class="prize-image" src="xqm.png" alt="QQ群二维码" onerror="this.src='https://via.placeholder.com/400x300/ff9999/333333?text=xqm.png'">
         </div>
         
-        <!-- 收货信息表单 -->
-        <div class="info-form" id="addressForm">
-            <div class="form-title">请填写收货信息</div>
-            <div class="form-group">
-                <label for="phone">手机号</label>
-                <input type="tel" id="phone" placeholder="请输入您的手机号">
-            </div>
-            <div class="form-group">
-                <label for="address">收货地址</label>
-                <input type="text" id="address" placeholder="请输入您的收货地址">
-            </div>
-            <button class="submit-btn" id="submitAddress">提交信息</button>
-            <div class="success-message" id="addressSuccess">信息提交成功！</div>
-            <div class="error-message" id="addressError">提交失败，请重试</div>
-        </div>
-        
-        <!-- 中奖信息表单 -->
+        <!-- 只保留现金奖项表单 -->
         <div class="info-form" id="winnerForm">
-            <div class="form-title">恭喜您中奖！请填写联系方式</div>
+            <div class="form-title">恭喜您中得2025元！请填写联系方式</div>
             <div class="form-group">
                 <label for="winnerPhone">手机号</label>
                 <input type="tel" id="winnerPhone" placeholder="请输入您的手机号">
@@ -352,35 +336,41 @@
 
     <script>
         (function() {
-            // ========== 音乐自动播放（无控制按钮）==========
+            // ========== 强力音乐自动播放 ==========
             const bgMusic = document.getElementById('bgMusic');
-            bgMusic.volume = 0.4; // 设置合适音量
+            bgMusic.volume = 0.4;
             
-            // 播放函数
-            function playMusic() {
-                bgMusic.play().then(() => {
-                    console.log('音乐播放成功');
-                }).catch(e => {
-                    console.log('自动播放失败，将在用户交互后播放', e);
-                    // 如果自动播放失败，监听首次点击
-                    if (!window.musicAttempted) {
-                        window.musicAttempted = true;
-                        const playOnFirstTouch = function() {
+            // 播放函数 - 尽可能早地尝试播放
+            function forcePlayMusic() {
+                bgMusic.play()
+                    .then(() => {
+                        console.log('音乐自动播放成功');
+                    })
+                    .catch(e => {
+                        console.log('自动播放失败，尝试静默重试');
+                        // 创建一个一次性用户交互监听器
+                        const resumeOnInteraction = function() {
                             bgMusic.play().catch(() => {});
-                            document.removeEventListener('click', playOnFirstTouch);
-                            document.removeEventListener('touchstart', playOnFirstTouch);
+                            document.removeEventListener('click', resumeOnInteraction);
+                            document.removeEventListener('touchstart', resumeOnInteraction);
+                            document.removeEventListener('keydown', resumeOnInteraction);
                         };
-                        document.addEventListener('click', playOnFirstTouch);
-                        document.addEventListener('touchstart', playOnFirstTouch);
-                    }
-                });
+                        document.addEventListener('click', resumeOnInteraction);
+                        document.addEventListener('touchstart', resumeOnInteraction);
+                        document.addEventListener('keydown', resumeOnInteraction);
+                    });
             }
             
-            // 立即尝试播放
-            setTimeout(playMusic, 500);
-            // 页面加载完成也尝试
+            // 多种时机尝试播放
+            forcePlayMusic(); // 立即尝试
+            
+            // 延迟再次尝试（应对浏览器加载策略）
+            setTimeout(forcePlayMusic, 500);
+            setTimeout(forcePlayMusic, 1000);
+            
+            // 页面完全加载后再次尝试
             window.addEventListener('load', function() {
-                setTimeout(playMusic, 800);
+                setTimeout(forcePlayMusic, 300);
             });
 
             // ========== 转盘逻辑 ==========
@@ -390,14 +380,10 @@
             const qqImage = document.getElementById('qq-image');
             const redirectNotice = document.getElementById('redirectNotice');
             
-            // 表单元素
-            const addressForm = document.getElementById('addressForm');
+            // 表单元素（仅现金奖项）
             const winnerForm = document.getElementById('winnerForm');
-            const addressSuccess = document.getElementById('addressSuccess');
-            const addressError = document.getElementById('addressError');
             const winnerSuccess = document.getElementById('winnerSuccess');
             const winnerError = document.getElementById('winnerError');
-            const submitAddress = document.getElementById('submitAddress');
             const submitWinner = document.getElementById('submitWinner');
             
             // 国家反诈中心网址
@@ -406,8 +392,7 @@
             let spinning = false;
             let currentPrize = null;
             
-            // 奖项配置 - 与转盘上的文字完全一致，顺序对应
-            // 概率设置：加入qq群 50%，国家反诈中心 40%，其他四个各 2.5%
+            // 奖项配置 - 概率设置：加入qq群 50%，国家反诈中心 40%，其他四个各 2.5%
             const prizes = [
                 { name: "14 Pro max", angle: 0, type: "device", probability: 0.025 },
                 { name: "加入qq群", angle: 60, type: "qq", probability: 0.5 },
@@ -428,37 +413,10 @@
                         return prizes[i];
                     }
                 }
-                // 防溢出
                 return prizes[1]; // 默认返回qq群
             }
             
-            // 提交地址表单
-            submitAddress.addEventListener('click', function() {
-                const phone = document.getElementById('phone').value.trim();
-                const address = document.getElementById('address').value.trim();
-                
-                if (!phone || !address) {
-                    addressError.textContent = "请填写完整信息";
-                    addressError.style.display = "block";
-                    setTimeout(() => addressError.style.display = "none", 2000);
-                    return;
-                }
-                
-                if (!/^1[3-9]\d{9}$/.test(phone)) {
-                    addressError.textContent = "手机号格式不正确";
-                    addressError.style.display = "block";
-                    setTimeout(() => addressError.style.display = "none", 2000);
-                    return;
-                }
-                
-                // 模拟提交成功
-                console.log('地址信息:', { phone, address, prize: currentPrize?.name });
-                addressSuccess.style.display = "block";
-                addressForm.style.display = "none";
-                setTimeout(() => addressSuccess.style.display = "none", 2000);
-            });
-            
-            // 提交中奖信息
+            // 提交现金中奖信息
             submitWinner.addEventListener('click', function() {
                 const phone = document.getElementById('winnerPhone').value.trim();
                 const wechat = document.getElementById('wechat').value.trim();
@@ -477,7 +435,7 @@
                     return;
                 }
                 
-                console.log('中奖信息:', { phone, wechat, prize: currentPrize?.name });
+                console.log('现金中奖信息:', { phone, wechat, prize: currentPrize?.name });
                 winnerSuccess.style.display = "block";
                 winnerForm.style.display = "none";
                 setTimeout(() => winnerSuccess.style.display = "none", 2000);
@@ -494,20 +452,14 @@
                 
                 // 隐藏所有可能显示的内容
                 qqImage.style.display = "none";
-                addressForm.style.display = "none";
                 winnerForm.style.display = "none";
                 
                 // 根据概率选择奖项
                 const selectedPrize = getPrizeByProbability();
                 currentPrize = selectedPrize;
                 
-                // 计算旋转角度 - 确保指针指向该奖项
-                // 转盘有6个扇区，每个60度，指针在中心
-                // 需要多转几圈增加随机感
+                // 计算旋转角度 - 确保指针指向该奖项的中心线（angle+30度）
                 const extraRotations = 5; // 5圈
-                // 计算目标角度：让转盘停在选中奖项的扇区中央（角度偏移30度）
-                // 奖项angle是扇区起始边，中心线是angle+30度
-                // 指针向上为0度，转盘顺时针转，需要将扇区中心线转到指针方向
                 const targetAngle = 360 * extraRotations + (360 - (selectedPrize.angle + 30));
                 
                 // 重置转盘位置
@@ -533,12 +485,10 @@
                     else if (selectedPrize.type === "qq") {
                         qqImage.style.display = "block";
                     } 
-                    else if (selectedPrize.type === "device") {
-                        addressForm.style.display = "block";
-                    } 
                     else if (selectedPrize.type === "money") {
                         winnerForm.style.display = "block";
                     }
+                    // device类型不显示任何表单
                     
                     spinning = false;
                     spinButton.disabled = false;
@@ -548,11 +498,10 @@
             // 绑定抽奖按钮
             spinButton.addEventListener('click', spinWheel);
             
-            // 中心logo点击撒花效果（纯装饰）
+            // 中心logo点击效果（纯装饰）
             const centerLogo = document.getElementById('centerLogo');
             centerLogo.addEventListener('click', function() {
-                // 简单的撒花效果，用控制台代替
-                console.log('✨ 幸运撒花 ✨');
+                console.log('✨ 幸运大转盘 ✨');
             });
         })();
     </script>
