@@ -336,42 +336,63 @@
 
     <script>
         (function() {
-            // ========== 强力音乐自动播放 ==========
+            // ========== 强力音乐自动播放 (修复版) ==========
             const bgMusic = document.getElementById('bgMusic');
             bgMusic.volume = 0.4;
             
-            // 播放函数 - 尽可能早地尝试播放
-            function forcePlayMusic() {
+            // 播放函数 - 同时处理Promise和用户交互后备
+            function attemptPlay(bypassInteraction = false) {
+                if (!bgMusic) return;
+                
+                // 尝试播放
                 bgMusic.play()
                     .then(() => {
-                        console.log('音乐自动播放成功');
+                        console.log('🎵 音乐自动播放成功');
+                        // 移除可能存在的监听器 (如果之前添加过)
+                        document.removeEventListener('click', playHandler);
+                        document.removeEventListener('touchstart', playHandler);
+                        document.removeEventListener('keydown', playHandler);
                     })
                     .catch(e => {
-                        console.log('自动播放失败，尝试静默重试');
-                        // 创建一个一次性用户交互监听器
-                        const resumeOnInteraction = function() {
-                            bgMusic.play().catch(() => {});
-                            document.removeEventListener('click', resumeOnInteraction);
-                            document.removeEventListener('touchstart', resumeOnInteraction);
-                            document.removeEventListener('keydown', resumeOnInteraction);
-                        };
-                        document.addEventListener('click', resumeOnInteraction);
-                        document.addEventListener('touchstart', resumeOnInteraction);
-                        document.addEventListener('keydown', resumeOnInteraction);
+                        console.log('⏸️ 自动播放被阻止，等待用户交互后播放');
+                        // 只在第一次失败时添加交互监听
+                        if (!window._musicListenersAttached) {
+                            window._musicListenersAttached = true;
+                            document.addEventListener('click', playHandler);
+                            document.addEventListener('touchstart', playHandler);
+                            document.addEventListener('keydown', playHandler);
+                        }
                     });
             }
             
-            // 多种时机尝试播放
-            forcePlayMusic(); // 立即尝试
+            // 用户交互时的处理函数 (只播放一次，然后移除)
+            function playHandler() {
+                bgMusic.play().catch(() => {}); // 静默尝试
+                document.removeEventListener('click', playHandler);
+                document.removeEventListener('touchstart', playHandler);
+                document.removeEventListener('keydown', playHandler);
+                console.log('🎧 用户交互触发音乐');
+            }
             
-            // 延迟再次尝试（应对浏览器加载策略）
-            setTimeout(forcePlayMusic, 500);
-            setTimeout(forcePlayMusic, 1000);
+            // 1. 立即尝试 (可能被浏览器阻止)
+            attemptPlay();
             
-            // 页面完全加载后再次尝试
+            // 2. 延迟尝试 (DOM渲染后)
+            setTimeout(attemptPlay, 500);
+            
+            // 3. 页面完全加载后再次尝试
             window.addEventListener('load', function() {
-                setTimeout(forcePlayMusic, 300);
+                setTimeout(attemptPlay, 300);
             });
+            
+            // 4. 特别加强：任何地方点击按钮时也尝试播放（因为用户肯定想交互）
+            //   但不要覆盖独立逻辑，使用统一的播放尝试（但不会重复添加监听）
+            document.addEventListener('click', function musicOnFirstClick() {
+                // 只执行一次，避免每次点击都触发
+                document.removeEventListener('click', musicOnFirstClick);
+                // 直接播放，不需要等待
+                bgMusic.play().catch(() => {});
+            }, { once: true }); // 用 { once: true } 简化
 
             // ========== 转盘逻辑 ==========
             const wheel = document.getElementById('wheel');
